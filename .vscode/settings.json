@@ -1,0 +1,10 @@
+{
+    "python.pythonPath": "/Users/panwuming/opt/anaconda3/envs/mytorch/bin/python",
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "jupyter.jupyterServerType": "local"
+}
