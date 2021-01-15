@@ -1,8 +1,10 @@
 import numpy as np
+
 def getPick(p):
     if p.ndim != 1:
         raise Exception("ndim does not equal 1！");
     lp = p.shape[0]
+    
     def pick(i):
         if lp == 0:
             return np.array([], dtype='int16')
@@ -10,8 +12,9 @@ def getPick(p):
         mn = p.min();
         if i.ndim != 1:
             raise Exception("ndim does not equal 1！");  
+        
         if mx >= i.shape[0]:
-            raise Exception("Argument invalid！");
+            raise Exception("Argument Invalid！");
         j = np.zeros(lp, dtype = 'int16');
         for k in range(lp):
             j[k]= i[p[k]];
@@ -27,6 +30,7 @@ def traversal(traversalShape,action):
     traversalInd = np.array(traversalShape);
     def traversalForInner(i):   
         n = traversalShape[i];
+        
         if i < ilen-1:
             for j in range(n):
                 traversalInd[i] = j;
@@ -50,21 +54,17 @@ def getProvisionXTransformer(shape0, shape1, T0, p0, p1, p):
     pick0 = getPick(p0);
     pick1 = getPick(p1);
     pick = getPick(p);
-    single = False;
-    if T0.ndim == len(p0):
-        single = True;
     def combine(IC):
         J0 = pick0(IC);
-        if single:
-            Jp = [T0[tuple(J0)]]
-        else:
-            Jp = T0[tuple(J0)];
+       
+        Jp = T0[tuple(J0)] 
         J1 = pick1(IC)
         Jl = list(tuple(Jp) + tuple(J1))
         Ja = np.array(Jl, dtype = 'int16')
         J = pick(Ja)
         E[tuple(IC)] = J;
     traversal(shape0,combine)
+   
     return E
 
 def scatter(src, X, XTransformer):
@@ -75,10 +75,23 @@ def scatter(src, X, XTransformer):
     traversal(shape,action)
     return src
 
-def scatterX(src, X, T0, p0, p1, p):
+def scatterX(src, X, shape1, T0, p0, p1, p):
     shape0 = X.shape;
-    shape1 = src.shape;
+    
     XTransformer = getProvisionXTransformer(shape0, shape1, T0, p0, p1, p);
+    
     scatter(src, X, XTransformer)
     return src
+def tensorflowScatter(tensor, indices, updates):
+    l = list(range(len(indices.shape) - 1))
+   
+    tl = indices.shape[-1]
+    ln = list(range(len(tensor.shape)))
+    
+    t1 = ln[tl:]   
+    
+    p0 = np.array(l, dtype='int16')
+    p1 = np.array(t1, dtype='int16')
+    p = np.array(ln, dtype='int16')
+    scatterX(tensor, updates, tensor.shape, indices, p0, p1, p)
     
